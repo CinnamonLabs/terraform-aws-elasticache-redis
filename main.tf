@@ -36,6 +36,7 @@ resource "aws_security_group" "default" {
 }
     
 resource "aws_security_group_rule" "egress" {
+  count  = var.enabled ? 1 : 0
   type        = "egress"
   protocol    = "-1"
   from_port   = 0
@@ -43,11 +44,11 @@ resource "aws_security_group_rule" "egress" {
   cidr_blocks = ["0.0.0.0/0"]
   # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
 
-  security_group_id = aws_security_group.default.id[0]
+  security_group_id = aws_security_group.default[count.index].id
 }
 
 resource "aws_security_group_rule" "ingress" {
-  count           = length(var.security_groups)
+  count           = var.enabled ? length(var.security_groups) : 0
   type            = "ingress"
   protocol        = "tcp"
   from_port       = var.port # Redis
@@ -55,7 +56,7 @@ resource "aws_security_group_rule" "ingress" {
   cidr_blocks     = var.cidr_blocks
   source_security_group_id = var.security_groups[count.index]
 
-  security_group_id = aws_security_group.default.id[0]
+  security_group_id = aws_security_group.default[count.index].id
 }
 
 locals {
