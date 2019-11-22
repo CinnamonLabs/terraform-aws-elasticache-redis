@@ -16,7 +16,7 @@ resource "aws_security_group" "default" {
   count  = var.enabled ? 1 : 0
   vpc_id = var.vpc_id
   name   = module.label.id
-
+  /*
   ingress {
     from_port       = var.port # Redis
     to_port         = var.port
@@ -31,8 +31,31 @@ resource "aws_security_group" "default" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
-
+  */
   tags = module.label.tags
+}
+    
+resource "aws_security_group_rule" "egress" {
+  type        = "egress"
+  protocol    = "-1"
+  from_port   = 0
+  to_port     = 0
+  cidr_blocks = ["0.0.0.0/0"]
+  # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
+
+  security_group_id = aws_security_group.default.id
+}
+
+resource "aws_security_group_rule" "ingress" {
+  count           = length(var.security_groups)
+  type            = "ingress"
+  protocol        = "tcp"
+  from_port       = var.port # Redis
+  to_port         = var.port
+  cidr_blocks     = var.cidr_blocks
+  source_security_group_id = var.security_groups[count.index]
+
+  security_group_id = aws_security_group.default.id
 }
 
 locals {
