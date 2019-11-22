@@ -47,6 +47,17 @@ resource "aws_security_group_rule" "egress" {
   security_group_id = aws_security_group.default[count.index].id
 }
 
+resource "aws_security_group_rule" "default_ingress" {
+  count           = var.enabled ? 1 : 0
+  type            = "ingress"
+  protocol        = "tcp"
+  from_port       = var.port # Redis
+  to_port         = var.port
+  cidr_blocks     = var.cidr_blocks
+
+  security_group_id = aws_security_group.default[count.index].id
+}
+    
 resource "aws_security_group_rule" "ingress" {
   count           = var.enabled ? length(var.security_groups) : 0
   type            = "ingress"
