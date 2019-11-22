@@ -64,7 +64,6 @@ resource "aws_security_group_rule" "ingress" {
   protocol        = "tcp"
   from_port       = var.port # Redis
   to_port         = var.port
-  cidr_blocks     = var.cidr_blocks
   source_security_group_id = var.security_groups[count.index]
 
   security_group_id = aws_security_group.default[count.index].id
