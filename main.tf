@@ -48,7 +48,7 @@ resource "aws_security_group_rule" "egress" {
 }
 
 resource "aws_security_group_rule" "default_ingress" {
-  count           = var.enabled ? 1 : 0
+  count           = var.enabled ? length(var.cidr_blocks) : 0
   type            = "ingress"
   protocol        = "tcp"
   from_port       = var.port # Redis
