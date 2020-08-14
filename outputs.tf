@@ -13,8 +13,11 @@ output "port" {
   description = "Redis port"
 }
 
+//locals {
+//  host_output = var.enabled = 1 ?
+//}
 output "host" {
-  value = coalesce(
+  value =   var.enabled != true ? null : coalesce(
     module.dns.hostname,
     join(
       "",

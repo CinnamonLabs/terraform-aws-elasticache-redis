@@ -13,7 +13,7 @@ module "label" {
 # Security Group Resources
 #
 resource "aws_security_group" "default" {
-  count  = var.enabled ? 1 : 0
+  //count  = var.enabled ? 1 : 0
   vpc_id = var.vpc_id
   name   = module.label.id
   /*
@@ -34,9 +34,12 @@ resource "aws_security_group" "default" {
   */
   tags = module.label.tags
 }
-    
+
 resource "aws_security_group_rule" "egress" {
-  count  = var.enabled ? 1 : 0
+  //count  = var.enabled ? 1 : 0
+  depends_on = [
+    aws_security_group.default
+  ]
   type        = "egress"
   protocol    = "-1"
   from_port   = 0
@@ -44,29 +47,39 @@ resource "aws_security_group_rule" "egress" {
   cidr_blocks = ["0.0.0.0/0"]
   # Opening to 0.0.0.0/0 can lead to security vulnerabilities.
 
-  security_group_id = aws_security_group.default[count.index].id
+  //security_group_id = aws_security_group.default[count.index].id
+  security_group_id = aws_security_group.default.id
 }
 
 resource "aws_security_group_rule" "default_ingress" {
-  count           = var.enabled ? length(var.cidr_blocks) : 0
+  depends_on = [
+    aws_security_group.default
+  ]
+  //count           = var.enabled ? length(var.cidr_blocks) : 0
+  count = length(var.cidr_blocks) > 0 ? 1 : 0
   type            = "ingress"
   protocol        = "tcp"
   from_port       = var.port # Redis
   to_port         = var.port
   cidr_blocks     = var.cidr_blocks
 
-  security_group_id = aws_security_group.default[count.index].id
+  //security_group_id = aws_security_group.default[count.index].id
+  security_group_id = aws_security_group.default.id
 }
-    
+
 resource "aws_security_group_rule" "ingress" {
-  count           = var.enabled ? length(var.security_groups) : 0
+  depends_on = [
+    aws_security_group.default
+  ]
+  count           = length(var.security_groups)
   type            = "ingress"
   protocol        = "tcp"
   from_port       = var.port # Redis
   to_port         = var.port
   source_security_group_id = var.security_groups[count.index]
 
-  security_group_id = aws_security_group.default[count.index].id
+  //security_group_id = aws_security_group.default[count.index].id
+  security_group_id = aws_security_group.default.id
 }
 
 locals {
